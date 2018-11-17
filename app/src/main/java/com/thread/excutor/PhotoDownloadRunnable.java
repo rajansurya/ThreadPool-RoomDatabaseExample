@@ -141,7 +141,7 @@ class PhotoDownloadRunnable implements Runnable {
 
                 // Downloads the image and catches IO errors
                 try {
-
+                    System.out.println("mPhotoTask.getImageURL() "+mPhotoTask.getImageURL());
                     // Opens an HTTP connection to the image's URL
                     HttpURLConnection httpConn = (HttpURLConnection) mPhotoTask.getImageURL().openConnection();
 
@@ -166,8 +166,8 @@ class PhotoDownloadRunnable implements Runnable {
                      * Gets the size of the file being downloaded. This
                      * may or may not be returned.
                      */
-                    int contentSize = httpConn.getContentLength();
-                    BufferedReader r = new BufferedReader(new InputStreamReader(httpConn.getInputStream()));
+//                    int contentSize = httpConn.getContentLength();
+                    BufferedReader r = new BufferedReader(new InputStreamReader(byteStream));
                      total = new StringBuilder();
                     for (String line; (line = r.readLine()) != null; ) {
                         total.append(line).append('\n');

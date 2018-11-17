@@ -42,11 +42,51 @@ public class MainThreadCall extends Activity implements PhotoManager.sendToAcivi
             photoTask2.setimageURL(url2);
             photoTasks.add(photoTask2);
 
+
+            PhotoTask photoTask3 = new PhotoTask();
+            URL url3 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask3.setimageURL(url3);
+            photoTasks.add(photoTask3);
+
+            PhotoTask photoTask21 = new PhotoTask();
+            URL url21 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask21.setimageURL(url21);
+
+            photoTasks.add(photoTask21);
+
+            PhotoTask photoTask22 = new PhotoTask();
+            URL url22 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask22.setimageURL(url22);
+            photoTasks.add(photoTask22);
+            PhotoTask photoTask23 = new PhotoTask();
+            URL url23 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask23.setimageURL(url23);
+            photoTasks.add(photoTask23);
+            PhotoTask photoTask24 = new PhotoTask();
+            URL url24 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask24.setimageURL(url24);
+            photoTasks.add(photoTask24);
+            PhotoTask photoTask25 = new PhotoTask();
+            URL url25 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask25.setimageURL(url25);
+            photoTasks.add(photoTask25);
+            PhotoTask photoTask26 = new PhotoTask();
+            URL url26 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask26.setimageURL(url26);
+            photoTasks.add(photoTask26);
+
+            PhotoTask photoTask27 = new PhotoTask();
+            URL url27 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask27.setimageURL(url27);
+
+            photoTasks.add(photoTask27);
+
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
         PhotoManager.getInstance().attachactivity(this);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < photoTasks.size(); i++) {
             PhotoManager.startDownload(photoTasks.get(i), false);
         }
 
@@ -67,12 +107,12 @@ public class MainThreadCall extends Activity implements PhotoManager.sendToAcivi
     @Override
     protected void onPause() {
         super.onPause();
-        PhotoManager.cancelAll();
+//        PhotoManager.cancelAll();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        PhotoManager.cancelAll();
+//        PhotoManager.cancelAll();
     }
 }

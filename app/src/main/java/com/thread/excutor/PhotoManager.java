@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -93,7 +94,7 @@ public class PhotoManager {
      * Creates a cache of byte arrays indexed by image URLs. As new items are added to the
      * cache, the oldest items are ejected and subject to garbage collection.
      */
-    private final LruCache<URL, byte[]> mPhotoCache;
+//    private final LruCache<URL, byte[]> mPhotoCache;
 
     // A queue of Runnables for the image download pool
     private final BlockingQueue<Runnable> mDownloadWorkQueue;
@@ -108,7 +109,7 @@ public class PhotoManager {
     private final ThreadPoolExecutor mDownloadThreadPool;
 
     // A managed pool of background decoder threads
-    private final ThreadPoolExecutor mDecodeThreadPool;
+//    private final ThreadPoolExecutor mDecodeThreadPool;
 
     // An object that manages Messages in a Thread
     private Handler mHandler;
@@ -118,17 +119,20 @@ public class PhotoManager {
 
     // A static block that sets class fields
     static {
-        
+
         // The time unit for "keep alive" is in seconds
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
-        
+
         // Creates a single static instance of PhotoManager
         sInstance = new PhotoManager();
     }
-    sendToAcivity sendToAcivity;
-    interface sendToAcivity{
+
+    WeakReference<sendToAcivity> sendToAcivity;
+
+    interface sendToAcivity {
         void sendtoactivity(String bitmap);
     }
+
     /**
      * Constructs the work queues and thread pools used to download and decode images.
      */
@@ -161,22 +165,22 @@ public class PhotoManager {
         /*
          * Creates a new pool of Thread objects for the decoding work queue
          */
-        mDecodeThreadPool = new ThreadPoolExecutor(NUMBER_OF_CORES, NUMBER_OF_CORES,
-                KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, mDecodeWorkQueue);
+//        mDecodeThreadPool = new ThreadPoolExecutor(NUMBER_OF_CORES, NUMBER_OF_CORES,
+//                KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, mDecodeWorkQueue);
 
         // Instantiates a new cache based on the cache size estimate
-        mPhotoCache = new LruCache<URL, byte[]>(IMAGE_CACHE_SIZE) {
+      /*  mPhotoCache = new LruCache<URL, byte[]>(IMAGE_CACHE_SIZE) {
 
-            /*
+            *//*
              * This overrides the default sizeOf() implementation to return the
              * correct size of each cache entry.
-             */
+             *//*
 
             @Override
             protected int sizeOf(URL paramURL, byte[] paramArrayOfByte) {
                 return paramArrayOfByte.length;
             }
-        };
+        };*/
         /*
          * Instantiates a new anonymous Handler object and defines its
          * handleMessage() method. The Handler *must* run on the UI thread, because it moves photo
@@ -219,7 +223,8 @@ public class PhotoManager {
 //                options.inJustDecodeBounds = false;
 //          Bitmap    bitmap=   BitmapFactory.decodeStream(buffer,null,options);
 //                System.out.println("bitmap"+bitmap);
-sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
+                if (sendToAcivity.get() != null)
+                    sendToAcivity.get().sendtoactivity(photoTask.getByteBuffer().toString());
                 // Sets an PhotoView that's a weak reference to the
                 // input ImageView
 //                PhotoView localView = photoTask.getPhotoView();
@@ -288,44 +293,49 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
             }
         };
     }
-    public  int calculateInSampleSize(
+
+    public int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
 
-        int stretch_width = Math.round((float)width / (float)reqWidth);
-        int stretch_height = Math.round((float)height / (float)reqHeight);
+        int stretch_width = Math.round((float) width / (float) reqWidth);
+        int stretch_height = Math.round((float) height / (float) reqHeight);
 
         if (stretch_width <= stretch_height)
             return stretch_height;
         else
             return stretch_width;
     }
+
     /**
      * Returns the PhotoManager object
+     *
      * @return The global PhotoManager object
      */
     public static PhotoManager getInstance() {
 
         return sInstance;
     }
-    public void attachactivity(sendToAcivity sendToAcivity){
-        this.sendToAcivity=sendToAcivity;
+
+    public void attachactivity(sendToAcivity sendToAcivity) {
+        this.sendToAcivity = new WeakReference<sendToAcivity>(sendToAcivity);
     }
-    
+
     /**
      * Handles state messages for a particular task object
+     *
      * @param photoTask A task object
-     * @param state The state of the task
+     * @param state     The state of the task
      */
     @SuppressLint("HandlerLeak")
     public void handleState(PhotoTask photoTask, int state) {
         switch (state) {
-            
+
             // The task finished downloading and decoding the image
             case TASK_COMPLETE:
-                
+
                 // Puts the image into cache
                 if (photoTask.isCacheEnabled()) {
                     // If the task is set to cache the results, put the buffer
@@ -333,12 +343,12 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
                     // successfully decoded into the cache
 //                    mPhotoCache.put(photoTask.getImageURL(), photoTask.getByteBuffer());
                 }
-                
+
                 // Gets a Message object, stores the state in it, and sends it to the Handler
                 Message completeMessage = mHandler.obtainMessage(state, photoTask);
                 completeMessage.sendToTarget();
                 break;
-            
+
             // The task finished downloading the image
             case DOWNLOAD_COMPLETE:
                 /*
@@ -346,8 +356,8 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
                  * thread pool
                  */
 //                mDecodeThreadPool.execute(photoTask.getPhotoDecodeRunnable());
-            
-            // In all other cases, pass along the message without any other action.
+
+                // In all other cases, pass along the message without any other action.
             default:
                 mHandler.obtainMessage(state, photoTask).sendToTarget();
                 break;
@@ -363,6 +373,7 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
         /*
          * Creates an array of tasks that's the same size as the task work queue
          */
+        System.out.println("PoolSizd  " + sInstance.mDownloadWorkQueue.size());
         PhotoTask[] taskArray = new PhotoTask[sInstance.mDownloadWorkQueue.size()];
 
         // Populates the array with the task objects in the queue
@@ -376,16 +387,16 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
          * iterates over the array of tasks and interrupts the task's current Thread.
          */
         synchronized (sInstance) {
-            
+
             // Iterates over the array of tasks
             for (int taskArrayIndex = 0; taskArrayIndex < taskArraylen; taskArrayIndex++) {
-                
+
                 // Gets the task's current thread
                 Thread thread = taskArray[taskArrayIndex].mThreadThis;
-                
+
                 // if the Thread exists, post an interrupt to it
                 if (null != thread) {
-                    System.out.println("interrupt"+taskArrayIndex);
+                    System.out.println("interrupt" + taskArrayIndex);
                     thread.interrupt();
                 }
             }
@@ -396,7 +407,7 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
      * Stops a download Thread and removes it from the threadpool
      *
      * @param downloaderTask The download task associated with the Thread
-     * @param pictureURL The URL being downloaded
+     * @param pictureURL     The URL being downloaded
      */
     static public void removeDownload(PhotoTask downloaderTask, URL pictureURL) {
 
@@ -407,7 +418,7 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
              * Locks on this class to ensure that other processes aren't mutating Threads.
              */
             synchronized (sInstance) {
-                
+
                 // Gets the Thread that the downloader task is running on
                 Thread thread = downloaderTask.getCurrentThread();
 
@@ -437,9 +448,9 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
 //        PhotoTask downloadTask = sInstance.mPhotoTaskWorkQueue.poll();
 
         // If the queue was empty, create a new task instead.
-        if (null == downloadTask) {
+       /* if (null == downloadTask) {
             downloadTask = new PhotoTask();
-        }
+        }*/
 
         // Initializes the task
         downloadTask.initializeDownloaderTask(PhotoManager.sInstance, cacheFlag);
@@ -449,29 +460,30 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
          * downloaded.
          */
 //        downloadTask.setByteBuffer(sInstance.mPhotoCache.get(downloadTask.getImageURL()));
-        System.out.println("downloadTask.getImageURL() "+downloadTask.getImageURL());
+        System.out.println("downloadTask.getImageURL() " + downloadTask.getImageURL());
+        sInstance.mDownloadThreadPool.execute(downloadTask.getHTTPDownloadRunnable());
         // If the byte buffer was empty, the image wasn't cached
-        if (null == downloadTask.getByteBuffer()) {
+       /* if (null == downloadTask.getByteBuffer()) {
             
-            /*
+            *//*
              * "Executes" the tasks' download Runnable in order to download the image. If no
              * Threads are available in the thread pool, the Runnable waits in the queue.
-             */
+             *//*
             sInstance.mDownloadThreadPool.execute(downloadTask.getHTTPDownloadRunnable());
 
             // Sets the display to show that the image is queued for downloading and decoding.
 //            imageView.setStatusResource(R.drawable.imagequeued);
-        
-        // The image was cached, so no download is required.
+
+            // The image was cached, so no download is required.
         } else {
             
-            /*
+            *//*
              * Signals that the download is "complete", because the byte array already contains the
              * undecoded image. The decoding starts.
-             */
-            
+             *//*
+
             sInstance.handleState(downloadTask, DOWNLOAD_COMPLETE);
-        }
+        }*/
 
         // Returns a task object, either newly-created or one from the task pool
         return downloadTask;
@@ -480,13 +492,14 @@ sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
     /**
      * Recycles tasks by calling their internal recycle() method and then putting them back into
      * the task queue.
+     *
      * @param downloadTask The task to recycle
      */
     void recycleTask(PhotoTask downloadTask) {
-        
+
         // Frees up memory in the task
         downloadTask.recycle();
-        
+
         // Puts the task object back into the queue for re-use.
 //        mPhotoTaskWorkQueue.offer(downloadTask);
     }
