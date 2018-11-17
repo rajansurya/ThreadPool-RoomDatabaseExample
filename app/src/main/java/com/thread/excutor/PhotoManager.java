@@ -17,11 +17,18 @@
 package com.thread.excutor;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.util.LruCache;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -118,6 +125,10 @@ public class PhotoManager {
         // Creates a single static instance of PhotoManager
         sInstance = new PhotoManager();
     }
+    sendToAcivity sendToAcivity;
+    interface sendToAcivity{
+        void sendtoactivity(String bitmap);
+    }
     /**
      * Constructs the work queues and thread pools used to download and decode images.
      */
@@ -187,7 +198,28 @@ public class PhotoManager {
                 // Gets the image task from the incoming Message object.
                 PhotoTask photoTask = (PhotoTask) inputMessage.obj;
 //                System.out.println("handleMessage   "+photoTask.get);
-                System.out.println("handleMessage   "+photoTask.getByteBuffer().length);
+//                System.out.println("handleMessage   "+photoTask.getByteBuffer().length);
+
+//                Bitmap bitmap = BitmapFactory.decodeByteArray(photoTask.getByteBuffer(), 0, photoTask.getByteBuffer().length);
+//                final BitmapFactory.Options options = new BitmapFactory.Options();
+//                options.inJustDecodeBounds = true;
+//                InputStream myInputStream = new ByteArrayInputStream(photoTask.getByteBuffer());
+//                BufferedInputStream buffer=new BufferedInputStream(myInputStream);
+//                BitmapFactory.decodeStream(buffer,null,options);
+//                try {
+//                    buffer.reset();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                // Calculate inSampleSize
+//                options.inSampleSize = calculateInSampleSize(options, 120,120);
+//
+//                // Decode bitmap with inSampleSize set
+//                options.inJustDecodeBounds = false;
+//          Bitmap    bitmap=   BitmapFactory.decodeStream(buffer,null,options);
+//                System.out.println("bitmap"+bitmap);
+sendToAcivity.sendtoactivity(photoTask.getByteBuffer().toString());
                 // Sets an PhotoView that's a weak reference to the
                 // input ImageView
 //                PhotoView localView = photoTask.getPhotoView();
@@ -256,7 +288,20 @@ public class PhotoManager {
             }
         };
     }
+    public  int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
 
+        int stretch_width = Math.round((float)width / (float)reqWidth);
+        int stretch_height = Math.round((float)height / (float)reqHeight);
+
+        if (stretch_width <= stretch_height)
+            return stretch_height;
+        else
+            return stretch_width;
+    }
     /**
      * Returns the PhotoManager object
      * @return The global PhotoManager object
@@ -264,6 +309,9 @@ public class PhotoManager {
     public static PhotoManager getInstance() {
 
         return sInstance;
+    }
+    public void attachactivity(sendToAcivity sendToAcivity){
+        this.sendToAcivity=sendToAcivity;
     }
     
     /**
@@ -283,7 +331,7 @@ public class PhotoManager {
                     // If the task is set to cache the results, put the buffer
                     // that was
                     // successfully decoded into the cache
-                    mPhotoCache.put(photoTask.getImageURL(), photoTask.getByteBuffer());
+//                    mPhotoCache.put(photoTask.getImageURL(), photoTask.getByteBuffer());
                 }
                 
                 // Gets a Message object, stores the state in it, and sends it to the Handler
@@ -337,6 +385,7 @@ public class PhotoManager {
                 
                 // if the Thread exists, post an interrupt to it
                 if (null != thread) {
+                    System.out.println("interrupt"+taskArrayIndex);
                     thread.interrupt();
                 }
             }
@@ -399,7 +448,7 @@ public class PhotoManager {
          * Provides the download task with the cache buffer corresponding to the URL to be
          * downloaded.
          */
-        downloadTask.setByteBuffer(sInstance.mPhotoCache.get(downloadTask.getImageURL()));
+//        downloadTask.setByteBuffer(sInstance.mPhotoCache.get(downloadTask.getImageURL()));
         System.out.println("downloadTask.getImageURL() "+downloadTask.getImageURL());
         // If the byte buffer was empty, the image wasn't cached
         if (null == downloadTask.getByteBuffer()) {

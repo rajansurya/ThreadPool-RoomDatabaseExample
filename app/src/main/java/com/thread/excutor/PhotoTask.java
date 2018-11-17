@@ -70,7 +70,7 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
 //    private Runnable mDecodeRunnable;
 
     // A buffer for containing the bytes that make up the image
-    byte[] mImageBuffer;
+    StringBuilder mImageBuffer;
     
     // The decoded image
 //    private Bitmap mDecodedImage;
@@ -121,7 +121,7 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
     
     // Implements HTTPDownloaderRunnable.getByteBuffer
     @Override
-    public byte[] getByteBuffer() {
+    public StringBuilder getByteBuffer() {
         
         // Returns the global field
         return mImageBuffer;
@@ -167,7 +167,7 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
 
     // Implements PhotoDownloadRunnable.setByteBuffer. Sets the image buffer to a buffer object.
     @Override
-    public void setByteBuffer(byte[] imageBuffer) {
+    public void setByteBuffer( StringBuilder imageBuffer) {
         mImageBuffer = imageBuffer;
     }
     
