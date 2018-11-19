@@ -16,9 +16,11 @@
 
 package com.thread.excutor;
 
+import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -59,14 +61,14 @@ class PhotoDownloadRunnable implements Runnable {
          *
          * @return The byte array downloaded from the URL in the last read
          */
-        byte[] getByteBuffer();
+        StringBuilder getByteBuffer();
 
         /**
          * Sets the current contents of the download buffer
          *
          * @param buffer The bytes that were just read
          */
-        void setByteBuffer(byte[] buffer);
+        void setByteBuffer(StringBuilder buffer);
 
         /**
          * Defines the actions for each state of the PhotoTask instance.
@@ -114,7 +116,7 @@ class PhotoDownloadRunnable implements Runnable {
          * Gets the image cache buffer object from the PhotoTask instance. This makes the
          * to both PhotoDownloadRunnable and PhotoTask.
          */
-        byte[] byteBuffer = mPhotoTask.getByteBuffer();
+//        byte[] byteBuffer = mPhotoTask.getByteBuffer();
 
         /*
          * A try block that downloads a Picasa image from a URL. The URL value is in the field
@@ -128,9 +130,9 @@ class PhotoDownloadRunnable implements Runnable {
 
                 throw new InterruptedException();
             }
-
+            StringBuilder total=null;
             // If there's no cache buffer for this image
-            if (null == byteBuffer) {
+//            if (null == byteBuffer) {
 
 
 
@@ -139,7 +141,7 @@ class PhotoDownloadRunnable implements Runnable {
 
                 // Downloads the image and catches IO errors
                 try {
-
+                    System.out.println("mPhotoTask.getImageURL() "+mPhotoTask.getImageURL());
                     // Opens an HTTP connection to the image's URL
                     HttpURLConnection httpConn = (HttpURLConnection) mPhotoTask.getImageURL().openConnection();
 
@@ -148,6 +150,7 @@ class PhotoDownloadRunnable implements Runnable {
 
                     // Before continuing, checks to see that the Thread
                     // hasn't been interrupted
+
                     if (Thread.interrupted()) {
 
                         throw new InterruptedException();
@@ -163,12 +166,17 @@ class PhotoDownloadRunnable implements Runnable {
                      * Gets the size of the file being downloaded. This
                      * may or may not be returned.
                      */
-                    int contentSize = httpConn.getContentLength();
-
+//                    int contentSize = httpConn.getContentLength();
+                    BufferedReader r = new BufferedReader(new InputStreamReader(byteStream));
+                     total = new StringBuilder();
+                    for (String line; (line = r.readLine()) != null; ) {
+                        total.append(line).append('\n');
+                    }
                     /*
                      * If the size of the image isn't available
+                     *
                      */
-                    if (-1 == contentSize) {
+                    /*if (-1 == contentSize) {
 
                         // Allocates a temporary buffer
                         byte[] tempBuffer = new byte[READ_SIZE];
@@ -176,49 +184,49 @@ class PhotoDownloadRunnable implements Runnable {
                         // Records the initial amount of available space
                         int bufferLeft = tempBuffer.length;
 
-                        /*
+                        *//*
                          * Defines the initial offset of the next available
                          * byte in the buffer, and the initial result of
                          * reading the binary
-                         */
+                         *//*
                         int bufferOffset = 0;
                         int readResult = 0;
 
-                        /*
+                        *//*
                          * The "outer" loop continues until all the bytes
                          * have been downloaded. The inner loop continues
                          * until the temporary buffer is full, and then
                          * allocates more buffer space.
-                         */
+                         *//*
                         outer:
                         do {
                             while (bufferLeft > 0) {
 
-                                /*
+                                *//*
                                  * Reads from the URL location into
                                  * the temporary buffer, starting at the
                                  * next available free byte and reading as
                                  * many bytes as are available in the
                                  * buffer.
-                                 */
+                                 *//*
                                 readResult = byteStream.read(tempBuffer, bufferOffset,
                                         bufferLeft);
 
-                                /*
+                                *//*
                                  * InputStream.read() returns zero when the
                                  * file has been completely read.
-                                 */
+                                 *//*
                                 if (readResult < 0) {
                                     // The read is finished, so this breaks
                                     // the to "outer" loop
                                     break outer;
                                 }
 
-                                /*
+                                *//*
                                  * The read isn't finished. This sets the
                                  * next available open position in the
                                  * buffer (the buffer index is 0-based).
-                                 */
+                                 *//*
                                 bufferOffset += readResult;
 
                                 // Subtracts the number of bytes read from
@@ -230,52 +238,52 @@ class PhotoDownloadRunnable implements Runnable {
                                     throw new InterruptedException();
                                 }
                             }
-                            /*
+                            *//*
                              * The temporary buffer is full, so the
                              * following code creates a new buffer that can
                              * contain the existing contents plus the next
                              * read cycle.
-                             */
+                             *//*
 
                             // Resets the amount of buffer left to be the
                             // max buffer size
                             bufferLeft = READ_SIZE;
 
-                            /*
+                            *//*
                              * Sets a new size that can contain the existing
                              * buffer's contents plus space for the next
                              * read cycle.
-                             */
+                             *//*
                             int newSize = tempBuffer.length + READ_SIZE;
 
-                            /*
+                            *//*
                              * Creates a new temporary buffer, moves the
                              * contents of the old temporary buffer into it,
                              * and then points the temporary buffer variable
                              * to the new buffer.
-                             */
+                             *//*
                             byte[] expandedBuffer = new byte[newSize];
                             System.arraycopy(tempBuffer, 0, expandedBuffer, 0,
                                     tempBuffer.length);
                             tempBuffer = expandedBuffer;
                         } while (true);
 
-                        /*
+                        *//*
                          * When the entire image has been read, this creates
                          * a permanent byte buffer with the same size as
                          * the number of used bytes in the temporary buffer
                          * (equal to the next open byte, because tempBuffer
                          * is 0=based).
-                         */
+                         *//*
                         byteBuffer = new byte[bufferOffset];
 
                         // Copies the temporary buffer to the image buffer
                         System.arraycopy(tempBuffer, 0, byteBuffer, 0, bufferOffset);
 
-                        /*
+                        *//*
                          * The download size is available, so this creates a
                          * permanent buffer of that length.
-                         */
+                         *//*
                     } else {
                         byteBuffer = new byte[contentSize];
 
@@ -285,20 +293,20 @@ class PhotoDownloadRunnable implements Runnable {
                         // The next open space in the buffer
                         int bufferOffset = 0;
 
-                        /*
+                        *//*
                          * Reads into the buffer until the number of bytes
                          * equal to the length of the buffer (the size of
                          * the image) have been read.
-                         */
+                         *//*
                         while (remainingLength > 0) {
                             int readResult = byteStream.read(
                                     byteBuffer,
                                     bufferOffset,
                                     remainingLength);
-                            /*
+                            *//*
                              * EOF should not occur, because the loop should
                              * read the exact # of bytes in the image
-                             */
+                             *//*
                             if (readResult < 0) {
 
                                 // Throws an EOF Exception
@@ -317,7 +325,7 @@ class PhotoDownloadRunnable implements Runnable {
                                 throw new InterruptedException();
                             }
                         }
-                    }
+                    }*/
 
                     if (Thread.interrupted()) {
 
@@ -341,12 +349,12 @@ class PhotoDownloadRunnable implements Runnable {
                         }
                     }
                 }
-            }
+//            }
 
             /*
              * Stores the downloaded bytes in the byte buffer in the PhotoTask instance.
              */
-            mPhotoTask.setByteBuffer(byteBuffer);
+            mPhotoTask.setByteBuffer(total);
 
             /*
              * Sets the status message in the PhotoTask instance. This sets the

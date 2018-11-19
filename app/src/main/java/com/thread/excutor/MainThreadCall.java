@@ -1,38 +1,118 @@
 package com.thread.excutor;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.roomwordsample.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainThreadCall extends Activity {
+public class MainThreadCall extends Activity implements PhotoManager.sendToAcivity {
+    ImageView  two, three;
+    TextView one;
+   static int i = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ArrayList<PhotoTask> photoTasks=new ArrayList<PhotoTask>();
+        setContentView(R.layout.activity_main);
+        one = (TextView) findViewById(R.id.one);
+        two = (ImageView) findViewById(R.id.two);
+        three = (ImageView) findViewById(R.id.three);
+
+        ArrayList<PhotoTask> photoTasks = new ArrayList<PhotoTask>();
         try {
-            URL url=new URL("https://www.google.com/imgres?imgurl=https%3A%2F%2Fprocessing.org%2Freference%2Fimages%2Ffilter_2_invert.png&imgrefurl=https%3A%2F%2Fprocessing.org%2Freference%2Ffilter_.html&docid=JYozfYKL-IRt-M&tbnid=1i0x51Glox8UcM%3A&vet=10ahUKEwiKi96N-tjeAhWDWysKHS43DN8QMwhtKAMwAw..i&w=100&h=100&safe=active&bih=648&biw=1304&q=image&ved=0ahUKEwiKi96N-tjeAhWDWysKHS43DN8QMwhtKAMwAw&iact=mrc&uact=8");
-            PhotoTask photoTask=   new PhotoTask();
+            URL url = new URL("https://www.cinemablend.com/rss_review.php");
+            PhotoTask photoTask = new PhotoTask();
             photoTask.setimageURL(url);
             photoTasks.add(photoTask);
 
-            PhotoTask photoTask1=   new PhotoTask();
-            URL url1=new URL("https://www.google.com/imgres?imgurl=https%3A%2F%2Fimagesvc.timeincapp.com%2Fv3%2Fmm%2Fimage%3Furl%3Dhttps%253A%252F%252Ffortunedotcom.files.wordpress.com%252F2018%252F11%252Fgettyimages-1046001872.jpg%253Fw%253D1024%26w%3D100%26h%3D100%26c%3Dsc%26poi%3Dface%26q%3D85&imgrefurl=http%3A%2F%2Ffortune.com%2F2018%2F10%2F12%2Fhow-to-post-3d-pictures-on-facebook%2F&docid=zVws-veOchVlPM&tbnid=jPAE5_1Rt1PDFM%3A&vet=10ahUKEwiKi96N-tjeAhWDWysKHS43DN8QMwhqKAEwAQ..i&w=100&h=100&safe=active&bih=648&biw=1304&q=image&ved=0ahUKEwiKi96N-tjeAhWDWysKHS43DN8QMwhqKAEwAQ&iact=mrc&uact=8");
+            PhotoTask photoTask1 = new PhotoTask();
+            URL url1 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
             photoTask1.setimageURL(url1);
             photoTasks.add(photoTask1);
-            PhotoTask photoTask2=   new PhotoTask();
-            URL url2=new URL("https://www.google.com/imgres?imgurl=http%3A%2F%2Fwww.visitbala.org%2Fimages%2Fmade%2Fimages%2Fremote%2Fhttp_www.visitbala.org.uk%2Fuploads%2Fimage-galleries%2FBoofing_on_the_River_Tryweryn_Large_100_100_c1.JPG&imgrefurl=http%3A%2F%2Fwww.visitbala.org%2Fabout-the-area%2Fimage-gallery%2F&docid=92mydiGNiUzs3M&tbnid=SWWR1M4VDtsZfM%3A&vet=10ahUKEwiKi96N-tjeAhWDWysKHS43DN8QMwiNASgUMBQ..i&w=100&h=100&safe=active&bih=648&biw=1304&q=image&ved=0ahUKEwiKi96N-tjeAhWDWysKHS43DN8QMwiNASgUMBQ&iact=mrc&uact=8");
+            PhotoTask photoTask2 = new PhotoTask();
+            URL url2 = new URL("https://www.androidpit.com/feed/main.xml");
             photoTask2.setimageURL(url2);
             photoTasks.add(photoTask2);
+
+
+            PhotoTask photoTask3 = new PhotoTask();
+            URL url3 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask3.setimageURL(url3);
+            photoTasks.add(photoTask3);
+
+            PhotoTask photoTask21 = new PhotoTask();
+            URL url21 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask21.setimageURL(url21);
+
+            photoTasks.add(photoTask21);
+
+            PhotoTask photoTask22 = new PhotoTask();
+            URL url22 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask22.setimageURL(url22);
+            photoTasks.add(photoTask22);
+            PhotoTask photoTask23 = new PhotoTask();
+            URL url23 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask23.setimageURL(url23);
+            photoTasks.add(photoTask23);
+            PhotoTask photoTask24 = new PhotoTask();
+            URL url24 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask24.setimageURL(url24);
+            photoTasks.add(photoTask24);
+            PhotoTask photoTask25 = new PhotoTask();
+            URL url25 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask25.setimageURL(url25);
+            photoTasks.add(photoTask25);
+            PhotoTask photoTask26 = new PhotoTask();
+            URL url26 = new URL("https://www.androidpit.com/feed/main.xml");
+            photoTask26.setimageURL(url26);
+            photoTasks.add(photoTask26);
+
+            PhotoTask photoTask27 = new PhotoTask();
+            URL url27 = new URL("https://www.stacktips.com/api/get_category_posts/?dev=1&slug=android");
+            photoTask27.setimageURL(url27);
+
+            photoTasks.add(photoTask27);
+
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        for (int i=0;i<3;i++) {
-            PhotoManager.startDownload(photoTasks.get(i),false);
+        PhotoManager.getInstance().attachactivity(this);
+        for (int i = 0; i < photoTasks.size(); i++) {
+            PhotoManager.startDownload(photoTasks.get(i), false);
         }
+
+    }
+
+    @Override
+    public void sendtoactivity(String bitmap) {
+        System.out.println("sendtoactivity=============="+i);
+//        if (i == 0)
+            one.setText(bitmap);
+//        if (i == 1)
+//            two.setImageBitmap(bitmap);
+//        if (i == 2)
+//            three.setImageBitmap(bitmap);
+        i++;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        PhotoManager.cancelAll();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        PhotoManager.cancelAll();
     }
 }
