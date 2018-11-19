@@ -241,7 +241,7 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
                 break;
         }
         // Passes the state to the ThreadPool object.
-        System.out.println("PhotoDownloadRunnable  "+outState);
+//        System.out.println("PhotoDownloadRunnable  "+outState);
         handleState(outState);
     }
 
