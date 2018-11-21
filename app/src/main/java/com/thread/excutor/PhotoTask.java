@@ -16,68 +16,32 @@
 
 package com.thread.excutor;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
-
 import com.thread.excutor.PhotoDownloadRunnable.TaskRunnableDownloadMethods;
 
-import java.lang.ref.WeakReference;
 import java.net.URL;
 
-/**
- * This class manages PhotoDownloadRunnable and PhotoDownloadRunnable objects.  It does't perform
- * the download or decode; instead, it manages persistent storage for the tasks that do the work.
- * It does this by implementing the interfaces that the download and decode classes define, and
- * then passing itself as an argument to the constructor of a download or decode object. In effect,
- * this allows PhotoTask to start on a Thread, run a download in a delegate object, then
- * run a decode, and then start over again. This class can be pooled and reused as necessary.
- */
 public class PhotoTask implements TaskRunnableDownloadMethods {
 
-    /*
-     * Creates a weak reference to the ImageView that this Task will populate.
-     * The weak reference prevents memory leaks and crashes, because it
-     * automatically tracks the "state" of the variable it backs. If the
-     * reference becomes invalid, the weak reference is garbage- collected. This
-     * technique is important for referring to objects that are part of a
-     * component lifecycle. Using a hard reference may cause memory leaks as the
-     * value continues to change; even worse, it can cause crashes if the
-     * underlying component is destroyed. Using a weak reference to a View
-     * ensures that the reference is more transitory in nature.
-     */
-//    private WeakReference<PhotoView> mImageWeakRef;
 
     // The image's URL
     private URL mImageURL;
 
-    // The width and height of the decoded image
-//    private int mTargetHeight;
-//    private int mTargetWidth;
-    
-    // Is the cache enabled for this transaction?
-    private boolean mCacheEnabled;
-
-    /*
-     * Field containing the Thread this task is running on.
-     */
-    Thread mThreadThis;
-
-    /*
-     * Fields containing references to the two runnable objects that handle downloading and
-     * decoding of the image.
-     */
     private Runnable mDownloadRunnable;
 //    private Runnable mDecodeRunnable;
 
     // A buffer for containing the bytes that make up the image
     StringBuilder mImageBuffer;
-    
+
     // The decoded image
 //    private Bitmap mDecodedImage;
-    
+    /*
+     * Field containing the Thread this task is running on.
+     */
+    Thread mThreadThis;
+
     // The Thread on which this task is currently running.
     private Thread mCurrentThread;
-    
+
     /*
      * An object that contains the ThreadPool singleton.
      */
@@ -89,69 +53,41 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
     PhotoTask() {
         // Create the runnables
         mDownloadRunnable = new PhotoDownloadRunnable(this);
-
         sPhotoManager = PhotoManager.getInstance();
     }
-    
+
     /**
      * Initializes the Task
      *
      * @param photoManager A ThreadPool object
-     * @param cacheFlag Whether caching is enabled
+     * @param cacheFlag    Whether caching is enabled
      */
-    void initializeDownloaderTask(PhotoManager photoManager, boolean cacheFlag)
-    {
+    void initializeDownloaderTask(PhotoManager photoManager, boolean cacheFlag) {
         // Sets this object's ThreadPool field to be the input argument
         sPhotoManager = photoManager;
-        
-        // Gets the URL for the View
-//        mImageURL = photoView.getLocation();
 
-        // Instantiates the weak reference to the incoming view
-//        mImageWeakRef = new WeakReference<PhotoView>(photoView);
 
-        // Sets the cache flag to the input argument
-        mCacheEnabled = cacheFlag;
-
-        // Gets the width and height of the provided ImageView
-//        mTargetWidth = photoView.getWidth();
-//        mTargetHeight = photoView.getHeight();
-        
     }
-    
+
     // Implements HTTPDownloaderRunnable.getByteBuffer
     @Override
     public StringBuilder getByteBuffer() {
-        
+
         // Returns the global field
         return mImageBuffer;
     }
-    
+
     /**
      * Recycles an PhotoTask object before it's put back into the pool. One reason to do
      * this is to avoid memory leaks.
      */
     void recycle() {
-        
-        // Deletes the weak reference to the imageView
-//        if ( null != mImageWeakRef ) {
-//            mImageWeakRef.clear();
-//            mImageWeakRef = null;
-//        }
-        
+
         // Releases references to the byte buffer and the BitMap
         mImageBuffer = null;
 //        mDecodedImage = null;
     }
 
-
-
-
-
-    // Detects the state of caching
-    boolean isCacheEnabled() {
-        return mCacheEnabled;
-    }
 
     // Implements PhotoDownloadRunnable.getImageURL. Returns the global Image URL.
     @Override
@@ -161,32 +97,26 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
 
     @Override
     public void setimageURL(URL var) {
-        mImageURL=var;
+        mImageURL = var;
     }
 
 
     // Implements PhotoDownloadRunnable.setByteBuffer. Sets the image buffer to a buffer object.
     @Override
-    public void setByteBuffer( StringBuilder imageBuffer) {
+    public void setByteBuffer(StringBuilder imageBuffer) {
         mImageBuffer = imageBuffer;
     }
-    
+
     // Delegates handling the current state of the task to the PhotoManager object
     void handleState(int state) {
         sPhotoManager.handleState(this, state);
     }
 
-    // Returns the image that PhotoDecodeRunnable decoded.
-   /* Bitmap getImage() {
-        return mDecodedImage;
-    }*/
 
     // Returns the instance that downloaded the image
     Runnable getHTTPDownloadRunnable() {
         return mDownloadRunnable;
     }
-
-
 
 
     /*
@@ -196,7 +126,7 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
      * changed by processes outside of this app.
      */
     public Thread getCurrentThread() {
-        synchronized(sPhotoManager) {
+        synchronized (sPhotoManager) {
             return mCurrentThread;
         }
     }
@@ -206,7 +136,7 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
      * notes for getCurrentThread()
      */
     public void setCurrentThread(Thread thread) {
-        synchronized(sPhotoManager) {
+        synchronized (sPhotoManager) {
             mCurrentThread = thread;
         }
     }
@@ -223,13 +153,13 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
      * Implements PhotoDownloadRunnable.handleHTTPState(). Passes the download state to the
      * ThreadPool object.
      */
-    
+
     @Override
     public void handleDownloadState(int state) {
         int outState;
-        
+
         // Converts the download state to the overall state
-        switch(state) {
+        switch (state) {
             case PhotoDownloadRunnable.HTTP_STATE_COMPLETED:
                 outState = PhotoManager.DOWNLOAD_COMPLETE;
                 break;
@@ -241,16 +171,8 @@ public class PhotoTask implements TaskRunnableDownloadMethods {
                 break;
         }
         // Passes the state to the ThreadPool object.
-//        System.out.println("PhotoDownloadRunnable  "+outState);
         handleState(outState);
     }
-
-    // Implements PhotoDecodeRunnable.setImageDecodeThread(). Calls setCurrentThread().
-
-    /*
-     * Implements PhotoDecodeRunnable.handleDecodeState(). Passes the decoding state to the
-     * ThreadPool object.
-     */
 
 
 }

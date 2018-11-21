@@ -100,7 +100,7 @@ public class PhotoManager {
     private final BlockingQueue<Runnable> mDownloadWorkQueue;
 
     // A queue of Runnables for the image decoding pool
-    private final BlockingQueue<Runnable> mDecodeWorkQueue;
+//    private final BlockingQueue<Runnable> mDecodeWorkQueue;
 
     // A queue of PhotoManager tasks. Tasks are handed to a ThreadPool.
 //    private final Queue<PhotoTask> mPhotoTaskWorkQueue;
@@ -144,17 +144,6 @@ public class PhotoManager {
          */
         mDownloadWorkQueue = new LinkedBlockingQueue<Runnable>();
 
-        /*
-         * Creates a work queue for the pool of Thread objects used for decoding, using a linked
-         * list queue that blocks when the queue is empty.
-         */
-        mDecodeWorkQueue = new LinkedBlockingQueue<Runnable>();
-
-        /*
-         * Creates a work queue for the set of of task objects that control downloading and
-         * decoding, using a linked list queue that blocks when the queue is empty.
-         */
-//        mPhotoTaskWorkQueue = new LinkedBlockingQueue<PhotoTask>();
 
         /*
          * Creates a new pool of Thread objects for the download work queue
@@ -162,34 +151,6 @@ public class PhotoManager {
         mDownloadThreadPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE,
                 KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, mDownloadWorkQueue);
 
-        /*
-         * Creates a new pool of Thread objects for the decoding work queue
-         */
-//        mDecodeThreadPool = new ThreadPoolExecutor(NUMBER_OF_CORES, NUMBER_OF_CORES,
-//                KEEP_ALIVE_TIME, KEEP_ALIVE_TIME_UNIT, mDecodeWorkQueue);
-
-        // Instantiates a new cache based on the cache size estimate
-      /*  mPhotoCache = new LruCache<URL, byte[]>(IMAGE_CACHE_SIZE) {
-
-            *//*
-             * This overrides the default sizeOf() implementation to return the
-             * correct size of each cache entry.
-             *//*
-
-            @Override
-            protected int sizeOf(URL paramURL, byte[] paramArrayOfByte) {
-                return paramArrayOfByte.length;
-            }
-        };*/
-        /*
-         * Instantiates a new anonymous Handler object and defines its
-         * handleMessage() method. The Handler *must* run on the UI thread, because it moves photo
-         * Bitmaps from the PhotoTask object to the View object.
-         * To force the Handler to run on the UI thread, it's defined as part of the PhotoManager
-         * constructor. The constructor is invoked when the class is first referenced, and that
-         * happens when the View invokes startDownload. Since the View runs on the UI Thread, so
-         * does the constructor and the Handler.
-         */
         mHandler = new Handler(Looper.getMainLooper()) {
 
             /*
@@ -201,113 +162,31 @@ public class PhotoManager {
 
                 // Gets the image task from the incoming Message object.
                 PhotoTask photoTask = (PhotoTask) inputMessage.obj;
-//                System.out.println("handleMessage   "+photoTask.get);
-//                System.out.println("handleMessage   "+photoTask.getByteBuffer().length);
-
-//                Bitmap bitmap = BitmapFactory.decodeByteArray(photoTask.getByteBuffer(), 0, photoTask.getByteBuffer().length);
-//                final BitmapFactory.Options options = new BitmapFactory.Options();
-//                options.inJustDecodeBounds = true;
-//                InputStream myInputStream = new ByteArrayInputStream(photoTask.getByteBuffer());
-//                BufferedInputStream buffer=new BufferedInputStream(myInputStream);
-//                BitmapFactory.decodeStream(buffer,null,options);
-//                try {
-//                    buffer.reset();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                // Calculate inSampleSize
-//                options.inSampleSize = calculateInSampleSize(options, 120,120);
-//
-//                // Decode bitmap with inSampleSize set
-//                options.inJustDecodeBounds = false;
-//          Bitmap    bitmap=   BitmapFactory.decodeStream(buffer,null,options);
-//                System.out.println("bitmap"+bitmap);
                 if (sendToAcivity.get() != null)
                     sendToAcivity.get().sendtoactivity(photoTask.getByteBuffer().toString());
-                // Sets an PhotoView that's a weak reference to the
-                // input ImageView
-//                PhotoView localView = photoTask.getPhotoView();
-
-                // If this input view isn't null
-              /*  if (localView != null) {
-
-                    *//*
-                     * Gets the URL of the *weak reference* to the input
-                     * ImageView. The weak reference won't have changed, even if
-                     * the input ImageView has.
-                     *//*
-                    URL localURL = localView.getLocation();
-
-                    *//*
-                     * Compares the URL of the input ImageView to the URL of the
-                     * weak reference. Only updates the bitmap in the ImageView
-                     * if this particular Thread is supposed to be serving the
-                     * ImageView.
-                     *//*
-                    if (photoTask.getImageURL() == localURL)
-
-                        *//*
-                         * Chooses the action to take, based on the incoming message
-                         *//*
-                        switch (inputMessage.what) {
-
-                            // If the download has started, sets background color to dark green
-                            case DOWNLOAD_STARTED:
-                                localView.setStatusResource(R.drawable.imagedownloading);
-                                break;
-
-                            *//*
-                             * If the download is complete, but the decode is waiting, sets the
-                             * background color to golden yellow
-                             *//*
-                            case DOWNLOAD_COMPLETE:
-                                // Sets background color to golden yellow
-                                localView.setStatusResource(R.drawable.decodequeued);
-                                break;
-                            // If the decode has started, sets background color to orange
-                            case DECODE_STARTED:
-                                localView.setStatusResource(R.drawable.decodedecoding);
-                                break;
-                            *//*
-                             * The decoding is done, so this sets the
-                             * ImageView's bitmap to the bitmap in the
-                             * incoming message
-                             *//*
-                            case TASK_COMPLETE:
-                                localView.setImageBitmap(photoTask.getImage());
-                                recycleTask(photoTask);
-                                break;
-                            // The download failed, sets the background color to dark red
-                            case DOWNLOAD_FAILED:
-                                localView.setStatusResource(R.drawable.imagedownloadfailed);
-                                
-                                // Attempts to re-use the Task object
-                                recycleTask(photoTask);
-                                break;
-                            default:
-                                // Otherwise, calls the super method
-                                super.handleMessage(inputMessage);
-                        }
-                }*/
             }
         };
     }
+    /**
+     * Starts an image download and decode
+     *
+     * @param cacheFlag Determines if caching should be used
+     * @return The task instance that will handle the work
+     */
+    static public PhotoTask startDownload(PhotoTask downloadTask, boolean cacheFlag) {
 
-    public int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
 
-        int stretch_width = Math.round((float) width / (float) reqWidth);
-        int stretch_height = Math.round((float) height / (float) reqHeight);
+        // Initializes the task
+        downloadTask.initializeDownloaderTask(PhotoManager.sInstance, cacheFlag);
 
-        if (stretch_width <= stretch_height)
-            return stretch_height;
-        else
-            return stretch_width;
+//        downloadTask.setByteBuffer(sInstance.mPhotoCache.get(downloadTask.getImageURL()));
+        System.out.println("downloadTask.getImageURL() " + downloadTask.getImageURL());
+        sInstance.mDownloadThreadPool.execute(downloadTask.getHTTPDownloadRunnable());
+
+        // Returns a task object, either newly-created or one from the task pool
+        return downloadTask;
     }
+
 
     /**
      * Returns the PhotoManager object
@@ -329,20 +208,13 @@ public class PhotoManager {
      * @param photoTask A task object
      * @param state     The state of the task
      */
-    @SuppressLint("HandlerLeak")
+
     public void handleState(PhotoTask photoTask, int state) {
         switch (state) {
 
             // The task finished downloading and decoding the image
             case TASK_COMPLETE:
 
-                // Puts the image into cache
-                if (photoTask.isCacheEnabled()) {
-                    // If the task is set to cache the results, put the buffer
-                    // that was
-                    // successfully decoded into the cache
-//                    mPhotoCache.put(photoTask.getImageURL(), photoTask.getByteBuffer());
-                }
 
                 // Gets a Message object, stores the state in it, and sends it to the Handler
                 Message completeMessage = mHandler.obtainMessage(state, photoTask);
@@ -434,60 +306,6 @@ public class PhotoManager {
         }
     }
 
-    /**
-     * Starts an image download and decode
-     *
-     * @param cacheFlag Determines if caching should be used
-     * @return The task instance that will handle the work
-     */
-    static public PhotoTask startDownload(PhotoTask downloadTask, boolean cacheFlag) {
-
-        /*
-         * Gets a task from the pool of tasks, returning null if the pool is empty
-         */
-//        PhotoTask downloadTask = sInstance.mPhotoTaskWorkQueue.poll();
-
-        // If the queue was empty, create a new task instead.
-       /* if (null == downloadTask) {
-            downloadTask = new PhotoTask();
-        }*/
-
-        // Initializes the task
-        downloadTask.initializeDownloaderTask(PhotoManager.sInstance, cacheFlag);
-        
-        /*
-         * Provides the download task with the cache buffer corresponding to the URL to be
-         * downloaded.
-         */
-//        downloadTask.setByteBuffer(sInstance.mPhotoCache.get(downloadTask.getImageURL()));
-        System.out.println("downloadTask.getImageURL() " + downloadTask.getImageURL());
-        sInstance.mDownloadThreadPool.execute(downloadTask.getHTTPDownloadRunnable());
-        // If the byte buffer was empty, the image wasn't cached
-       /* if (null == downloadTask.getByteBuffer()) {
-            
-            *//*
-             * "Executes" the tasks' download Runnable in order to download the image. If no
-             * Threads are available in the thread pool, the Runnable waits in the queue.
-             *//*
-            sInstance.mDownloadThreadPool.execute(downloadTask.getHTTPDownloadRunnable());
-
-            // Sets the display to show that the image is queued for downloading and decoding.
-//            imageView.setStatusResource(R.drawable.imagequeued);
-
-            // The image was cached, so no download is required.
-        } else {
-            
-            *//*
-             * Signals that the download is "complete", because the byte array already contains the
-             * undecoded image. The decoding starts.
-             *//*
-
-            sInstance.handleState(downloadTask, DOWNLOAD_COMPLETE);
-        }*/
-
-        // Returns a task object, either newly-created or one from the task pool
-        return downloadTask;
-    }
 
     /**
      * Recycles tasks by calling their internal recycle() method and then putting them back into
